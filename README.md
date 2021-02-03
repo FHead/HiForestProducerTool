@@ -28,7 +28,7 @@ Then follow these steps:
   ```
   mkdir HiForest
   cd HiForest
-  git clone -b 2011 git://github.com/cms-opendata-analyses/HiForestProducerTool.git HiForestProducer
+  git clone -b 2011 git://github.com/FHead/HiForestProducerTool.git HiForestProducer
   cd HiForestProducer
   ```
 
