@@ -37,8 +37,8 @@
 #include "DataFormats/EgammaReco/interface/PreshowerClusterFwd.h"
 
 // PF
-#include "DataFormats/ParticleFlowCandidate/interface/PFCanidate.h"
-#include "DataFormats/ParticleFlowCandidate/interface/PFCanidateFwd.h"
+#include "DataFormats/ParticleFlowCandidate/interface/PFCandidate.h"
+#include "DataFormats/ParticleFlowCandidate/interface/PFCandidateFwd.h"
 
 // beamspot
 #include "DataFormats/BeamSpot/interface/BeamSpot.h"
@@ -437,7 +437,7 @@ void Analyzer::analyze(const Event &iEvent, const EventSetup &iSetup)
 
       // PF
       iEvent.getByLabel(InputTagPF, hPF);
-      FillPF(hPF);
+      FillParticleFlow(hPF);
    }
    // fill event info
    FillEvent(iEvent);
