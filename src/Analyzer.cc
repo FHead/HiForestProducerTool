@@ -360,6 +360,7 @@ void Analyzer::analyze(const edm::Event &iEvent, const edm::EventSetup &iSetup)
    // declare event contents
    Handle<reco::VertexCollection> hVertex;
    edm::Handle<reco::TrackCollection> hMuon;
+   edm::Handle<reco::TrackCollection> hTrack;
 
    // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
    // >>>>>>>>> event selection >>>>>>>>>
