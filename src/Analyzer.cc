@@ -36,6 +36,10 @@
 #include "DataFormats/EgammaReco/interface/PreshowerCluster.h"
 #include "DataFormats/EgammaReco/interface/PreshowerClusterFwd.h"
 
+// PF
+#include "DataFormats/ParticleFlowCandidate/PFCanidate.h"
+#include "DataFormats/ParticleFlowCandidate/PFCanidateFwd.h"
+
 // beamspot
 #include "DataFormats/BeamSpot/interface/BeamSpot.h"
 

@@ -46,6 +46,8 @@
 <use name="DataFormats/MuonReco"/>
 <use name="RecoMuon/TrackingTools"/>
 <use name="DataFormats/BTauReco"/> 
+<use name="DataFormats/ParticleFlowCandidate"/> 
+<use name="DataFormats/EgammaCandidates"/> 
 <use name="DataFormats/Common"/>
 <use name="HLTrigger/HLTcore"/> 
 <use name="JetMETCorrections/Objects"/>
