@@ -1,16 +1,11 @@
-
-// system include files
 #include <memory>
+#include <cmath>
 
-// user include files
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/Framework/interface/EDAnalyzer.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
-
-//------ EXTRA HEADER FILES--------------------//
-#include "math.h"
 #include "FWCore/Framework/interface/EventSetup.h"
 #include "FWCore/Framework/interface/ESHandle.h"
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
@@ -18,65 +13,56 @@
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 #include "DataFormats/Common/interface/Ref.h"
 
-// for tracking information
+// Tracking
 #include "DataFormats/TrackReco/interface/Track.h"
 #include "DataFormats/TrackReco/interface/TrackFwd.h"
 #include "DataFormats/TrackReco/interface/HitPattern.h"
 
-// for vertex information 
+// Vertex 
 #include "DataFormats/VertexReco/interface/Vertex.h"
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
 
-// for muons
+// Muons
 #include "DataFormats/MuonReco/interface/Muon.h"
 #include "DataFormats/MuonReco/interface/MuonFwd.h"
 #include "DataFormats/MuonReco/interface/MuonSelectors.h"
 #include "DataFormats/MuonReco/interface/MuonIsolation.h"
 
-// for electrons uncomment when implemented
-//#include "DataFormats/GsfTrackReco/interface/GsfTrack.h"
-//#include "DataFormats/EgammaCandidates/interface/GsfElectron.h"
-
-//for beamspot information
+// beamspot
 #include "DataFormats/BeamSpot/interface/BeamSpot.h"
 
-// triggers
+// Trigger
 #include "DataFormats/Common/interface/TriggerResults.h"
 #include "HLTrigger/HLTcore/interface/HLTConfigProvider.h"
 
 // ROOT
-#include <TLorentzVector.h>
-#include <TFile.h>
-#include <TTree.h>
+#include "TLorentzVector.h"
+#include "TFile.h"
+#include "TTree.h"
+#include "TDirectory.h"
 
-#include <TTree.h>
-#include <TDirectory.h>
-
-//
-// class declaration
-//
 class Analyzer : public edm::EDAnalyzer
 {
 public:
-   explicit Analyzer(const edm::ParameterSet&);
+   explicit Analyzer(const edm::ParameterSet &);
    ~Analyzer();
 
-   static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
+   static void fillDescriptions(edm::ConfigurationDescriptions &descriptions);
 
 private:
    virtual void beginJob();
-   virtual void analyze(const edm::Event&, const edm::EventSetup&);
+   virtual void analyze(const edm::Event &, const edm::EventSetup &);
    virtual void endJob();
 
-   virtual void beginRun(edm::Run const&, edm::EventSetup const&);
-   virtual void endRun(edm::Run const&, edm::EventSetup const&);
-   virtual void beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&);
-   virtual void endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&);
+   virtual void beginRun(const edm::Run &, const edm::EventSetup &);
+   virtual void endRun(const edm::Run &, const edm::EventSetup &);
+   virtual void beginLuminosityBlock(const edm::LuminosityBlock &, const edm::EventSetup &);
+   virtual void endLuminosityBlock(const edm::LuminosityBlock &, const edm::EventSetup &);
 
    // user routines (detailed description given with the method implementations)
-   bool SelectEvent(const edm::Event& iEvent);
-   bool SelectMuon(const edm::Handle<reco::TrackCollection>& muons, const reco::VertexCollection::const_iterator& pv);
-   bool SelectPrimaryVertex(const edm::Handle<reco::VertexCollection>& Vertex);
+   bool SelectEvent(const edm::Event &iEvent);
+   bool SelectMuon(const edm::Handle<reco::TrackCollection> &muons, const reco::VertexCollection::const_iterator &pv);
+   bool SelectPrimaryVertex(const edm::Handle<reco::VertexCollection> &Vertex);
    const reco::Candidate* GetFinalState(const reco::Candidate* particle, const int id);
    void FillFourMomentum(const reco::Candidate* particle, float* p);
    void InitBranchVars();
@@ -144,7 +130,7 @@ double MassEl = 0.000511;
 //
 // constructor
 //
-Analyzer::Analyzer(const edm::ParameterSet& iConfig)
+Analyzer::Analyzer(const edm::ParameterSet &iConfig)
 {
    // for proper log files writing (immediate output)
    setbuf(stdout, NULL);
@@ -169,13 +155,13 @@ Analyzer::Analyzer(const edm::ParameterSet& iConfig)
    // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
    //
    // event
-   Tree->Branch("RunNumber", &RunNumber, "RunNumber/I"); // run number
-   Tree->Branch("EventNumber", &EventNumber, "EventNumber/I"); // event number
+   Tree->Branch("RunNumber",  &RunNumber, "RunNumber/I"); // run number
+   Tree->Branch("EventNumber",  &EventNumber, "EventNumber/I"); // event number
 
    if(FlagRECO)
    {
       // muons
-      Tree->Branch("NMu", &NMu, "NMu/I"); // number of Muons 
+      Tree->Branch("NMu",  &NMu, "NMu/I"); // number of Muons 
       Tree->Branch("MuPt", MuPt, "MuPt[NMu]/F"); // Muon pT
       Tree->Branch("MuEta", MuEta, "MuEta[NMu]/F"); // Muon pseudorapidity
       Tree->Branch("MuPhi", MuPhi, "MuPhi[NMu]/F"); // Muon phi
@@ -188,12 +174,12 @@ Analyzer::Analyzer(const edm::ParameterSet& iConfig)
       Tree->Branch("MuDistPVz", MuDistPVz, "MuDistPVz[NMu]/F"); // Muon distance to the primary vertex (z projection)
       Tree->Branch("MuTrackChi2NDOF", MuTrackChi2NDOF, "MuTrackChi2NDOF[NMu]/F"); // Muon track number of degrees of freedom
       // tracks
-      Tree->Branch("NTrack", &NTrack, "NTrack/I");   // number of tracks
+      Tree->Branch("NTrack",  &NTrack, "NTrack/I");   // number of tracks
       // primary vertex
-      Tree->Branch("NPV", &NPV, "NPV/I"); // total number of primary vertices
-      Tree->Branch("PVNDOF", &PVNDOF, "PVNDOF/I"); // number of degrees of freedom of the primary vertex
-      Tree->Branch("PVZ", &PVZ, "PVZ/F"); // z component of the primary vertex
-      Tree->Branch("PVRho", &PVRho, "PVRho/F"); // rho of the primary vertex (projection on transverse plane)
+      Tree->Branch("NPV",  &NPV, "NPV/I"); // total number of primary vertices
+      Tree->Branch("PVNDOF",  &PVNDOF, "PVNDOF/I"); // number of degrees of freedom of the primary vertex
+      Tree->Branch("PVZ",  &PVZ, "PVZ/F"); // z component of the primary vertex
+      Tree->Branch("PVRho",  &PVRho, "PVRho/F"); // rho of the primary vertex (projection on transverse plane)
    }
 
 }
@@ -222,7 +208,7 @@ void Analyzer::InitBranchVars()
 }
 
 // Store event info (fill corresponding tree variables)
-bool Analyzer::SelectEvent(const edm::Event& iEvent)
+bool Analyzer::SelectEvent(const edm::Event &iEvent)
 {
    RunNumber = iEvent.id().run();
    EventNumber = iEvent.id().event();
@@ -230,8 +216,8 @@ bool Analyzer::SelectEvent(const edm::Event& iEvent)
 }
 
 // muon selection
-bool Analyzer::SelectMuon(const edm::Handle<reco::TrackCollection>& muons,
-   const reco::VertexCollection::const_iterator& pv)
+bool Analyzer::SelectMuon(const edm::Handle<reco::TrackCollection> &muons,
+   const reco::VertexCollection::const_iterator &pv)
 {
    using namespace std;
    NMu = 0;
@@ -247,11 +233,11 @@ bool Analyzer::SelectMuon(const edm::Handle<reco::TrackCollection>& muons,
       }
       MuHitsValid[NMu] = 0;
       MuHitsPixel[NMu] = 0;
-      const reco::HitPattern& p = it->hitPattern();
+      const reco::HitPattern &p = it->hitPattern();
       for (int i = 0; i < p.numberOfHits(); i++) 
       {
          uint32_t hit = p.getHitPattern(i);
-         if (p.validHitFilter(hit) && p.pixelHitFilter(hit))
+         if (p.validHitFilter(hit)  & &p.pixelHitFilter(hit))
             MuHitsPixel[NMu]++;
          if (p.validHitFilter(hit))
             MuHitsValid[NMu]++;
@@ -279,7 +265,7 @@ bool Analyzer::SelectMuon(const edm::Handle<reco::TrackCollection>& muons,
 }
 
 // select primary vertex
-bool Analyzer::SelectPrimaryVertex(const edm::Handle<reco::VertexCollection>& Vertex)
+bool Analyzer::SelectPrimaryVertex(const edm::Handle<reco::VertexCollection> &Vertex)
 {
    // if no primary vertices in the event, return false status
    if(Vertex->size() == 0)
@@ -317,7 +303,7 @@ void Analyzer::FillFourMomentum(const reco::Candidate* particle, float* p)
 // (analysis specific ttbar dileptonic decay)
 
 // ------------ method called for each event  ------------
-void Analyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
+void Analyzer::analyze(const edm::Event &iEvent, const edm::EventSetup &iSetup)
 {
    using namespace edm;
    using namespace reco;
@@ -361,7 +347,7 @@ void Analyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
 
 // ------------ method called when starting to processes a run  ------------
-void Analyzer::beginRun(edm::Run const& iRun, edm::EventSetup const& iSetup)
+void Analyzer::beginRun(const edm::Run &iRun, const edm::EventSetup &iSetup)
 {
 }
 
@@ -378,22 +364,22 @@ void Analyzer::endJob()
 }
 
 // ------------ method called when ending the processing of a run  ------------
-void Analyzer::endRun(edm::Run const& run, edm::EventSetup const& setup) 
+void Analyzer::endRun(const edm::Run &iRun, const edm::EventSetup &iSetup) 
 {
 }
 
 // ------------ method called when starting to processes a luminosity block  ------------
-void Analyzer::beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&)
+void Analyzer::beginLuminosityBlock(const edm::LuminosityBlock &iBlock, const edm::EventSetup &iSetup)
 {
 }
 
 // ------------ method called when ending the processing of a luminosity block  ------------
-void Analyzer::endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&)
+void Analyzer::endLuminosityBlock(const edm::LuminosityBlock &iBlock, const edm::EventSetup &iSetup)
 {
 }
 
 // ------------ method fills 'descriptions' with the allowed parameters for the module  ------------
-void Analyzer::fillDescriptions(edm::ConfigurationDescriptions& descriptions)
+void Analyzer::fillDescriptions(edm::ConfigurationDescriptions &descriptions)
 {
    edm::ParameterSetDescription desc;
    desc.setUnknown();
