@@ -237,7 +237,7 @@ bool Analyzer::SelectMuon(const edm::Handle<reco::TrackCollection>& muons,
    NMu = 0;
    NMu0 = 0;
    // loop over muons
-   for (reco::TrackCollection::const_iterator it = muons->begin(); it ! = muons->end(); it++)
+   for(reco::TrackCollection::const_iterator it = muons->begin(); it != muons->end(); it++)
    {
       NMu0++;
       if(NMu == MaxNmu)
