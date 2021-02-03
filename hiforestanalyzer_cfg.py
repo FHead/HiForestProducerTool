@@ -7,7 +7,7 @@ process = cms.Process('HiForest')
 process.options = cms.untracked.PSet(SkipEvent = cms.untracked.vstring('ProductNotFound'))
 
 #Number of events: put '-1' unless testing
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
 
 #HiForest script init
 process.load("HiForest_cff")
@@ -28,7 +28,7 @@ process.source.lumisToProcess.extend(myLumis)
 
 #Global Tag: change the name according to the instructions
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
-process.GlobalTag.connect = cms.string('sqlite_file:/cvmfs/cms-opendata-conddb.cern.ch/GR_R_44_V15.db')
+# process.GlobalTag.connect = cms.string('sqlite_file:/cvmfs/cms-opendata-conddb.cern.ch/GR_R_44_V15.db')
 process.GlobalTag.globaltag = 'GR_R_44_V15::All'
 process.load('FWCore.MessageService.MessageLogger_cfi')
 process.load("Configuration.StandardSequences.MagneticField_cff")
