@@ -60,14 +60,15 @@ private:
    virtual void endLuminosityBlock(const edm::LuminosityBlock &, const edm::EventSetup &);
 
    // user routines (detailed description given with the method implementations)
-   bool SelectEvent(const edm::Event &iEvent);
-   bool SelectMuon(const edm::Handle<reco::TrackCollection> &muons, const reco::VertexCollection::const_iterator &pv);
-   bool SelectPrimaryVertex(const edm::Handle<reco::VertexCollection> &Vertex);
+   bool FillEvent(const edm::Event &iEvent);
+   bool FillMuon(const edm::Handle<reco::TrackCollection> &muons, const reco::VertexCollection::const_iterator &pv);
+   bool FillPrimaryVertex(const edm::Handle<reco::VertexCollection> &Vertex);
    const reco::Candidate* GetFinalState(const reco::Candidate* particle, const int id);
    void FillFourMomentum(const reco::Candidate* particle, float* p);
    void InitBranchVars();
 
    // input tags
+   edm::InputTag InputTagTracks;
    edm::InputTag InputTagMuons;
    edm::InputTag InputTagElectrons;
    edm::InputTag InputTagBtags;
@@ -93,6 +94,12 @@ private:
    // event
    int RunNumber;
    int EventNumber;
+   // tracks
+   static const int MaxNTrack = 10000;
+   int NTrack;
+   float TrackPt[MaxNTrack];
+   float TrackEta[MaxNTrack];
+   float TrackPhi[MaxNTrack];
    // muons
    static const int MaxNmu = 10;
    int NMu;
@@ -108,12 +115,6 @@ private:
    float MuDistPV0[MaxNmu];
    float MuDistPVz[MaxNmu];
    float MuTrackChi2NDOF[MaxNmu];
-   // tracks
-   static const int MaxNTrack = 10000;
-   int NTrack;
-   float TrackPt[MaxNTrack];
-   float TrackEta[MaxNTrack];
-   float TrackPhi[MaxNTrack];
    // primary vertex
    int NPV;
    int PVNDOF;
@@ -121,15 +122,6 @@ private:
    float PVRho;
 };
 
-//
-// constants (particle masses)
-//
-double MassMu = 0.105658;
-double MassEl = 0.000511;
-
-//
-// constructor
-//
 Analyzer::Analyzer(const edm::ParameterSet &iConfig)
 {
    // for proper log files writing (immediate output)
@@ -137,9 +129,10 @@ Analyzer::Analyzer(const edm::ParameterSet &iConfig)
 
    // input tags
    InputTagMuons = edm::InputTag("globalMuons");
-   //InputTagElectrons = edm::InputTag("gsfElectrons"); //use this to Analyze electrons
-   InputTagPrimaryVertex = edm::InputTag("offlinePrimaryVertices"); //vertex input tag used for pp collisions
-   //InputTagPrimaryVertex = edm::InputTag("hiSelectedVertex"); //'hiSelectedVertex' is generally used for PbPb collisions
+   InputTagTracks = edm::InputTag("generalTracks");
+   InputTagPrimaryVertex = edm::InputTag("offlinePrimaryVertices");
+   // vertex input tag used for pp collisions = "offlinePrimaryVertices"
+   // PbPb might be "hiSelectedVertex"
 
    // read configuration parameters
    FlagMC = 0;   // iConfig.getParameter<int>("mc"); // true for MC, false for data
@@ -160,6 +153,11 @@ Analyzer::Analyzer(const edm::ParameterSet &iConfig)
 
    if(FlagRECO)
    {
+      // tracks
+      Tree->Branch("NTrack",  &NTrack, "NTrack/I");   // number of tracks
+      Tree->Branch("TrackPt", TrackPt, "TrackPt[NTrack]/F");
+      Tree->Branch("TrackEta", TrackEta, "TrackEta[NTrack]/F");
+      Tree->Branch("TrackPhi", TrackPhi, "TrackPhi[NTrack]/F");
       // muons
       Tree->Branch("NMu",  &NMu, "NMu/I"); // number of Muons 
       Tree->Branch("MuPt", MuPt, "MuPt[NMu]/F"); // Muon pT
@@ -173,8 +171,6 @@ Analyzer::Analyzer(const edm::ParameterSet &iConfig)
       Tree->Branch("MuDistPV0", MuDistPV0, "MuDistPV0[NMu]/F"); // Muon distance to the primary vertex (projection on transverse plane)
       Tree->Branch("MuDistPVz", MuDistPVz, "MuDistPVz[NMu]/F"); // Muon distance to the primary vertex (z projection)
       Tree->Branch("MuTrackChi2NDOF", MuTrackChi2NDOF, "MuTrackChi2NDOF[NMu]/F"); // Muon track number of degrees of freedom
-      // tracks
-      Tree->Branch("NTrack",  &NTrack, "NTrack/I");   // number of tracks
       // primary vertex
       Tree->Branch("NPV",  &NPV, "NPV/I"); // total number of primary vertices
       Tree->Branch("PVNDOF",  &PVNDOF, "PVNDOF/I"); // number of degrees of freedom of the primary vertex
@@ -184,22 +180,17 @@ Analyzer::Analyzer(const edm::ParameterSet &iConfig)
 
 }
 
-
 // destructor
 Analyzer::~Analyzer()
 {
 }
-
-
-//
-// member functions
-//
 
 // initialise event variables with needed default (zero) values; called in the beginning of each event
 void Analyzer::InitBranchVars()
 {
    RunNumber = 0;
    EventNumber = 0;
+   NTrack = 0;
    NMu = 0;
    NPV = 0;
    PVNDOF = 0;
@@ -208,15 +199,15 @@ void Analyzer::InitBranchVars()
 }
 
 // Store event info (fill corresponding tree variables)
-bool Analyzer::SelectEvent(const edm::Event &iEvent)
+bool Analyzer::FillEvent(const edm::Event &iEvent)
 {
    RunNumber = iEvent.id().run();
    EventNumber = iEvent.id().event();
-   return 0;
+   return true;
 }
 
 // muon selection
-bool Analyzer::SelectMuon(const edm::Handle<reco::TrackCollection> &muons,
+bool Analyzer::FillMuon(const edm::Handle<reco::TrackCollection> &muons,
    const reco::VertexCollection::const_iterator &pv)
 {
    using namespace std;
@@ -229,17 +220,17 @@ bool Analyzer::SelectMuon(const edm::Handle<reco::TrackCollection> &muons,
       if(NMu == MaxNmu)
       {
          printf("Maximum number of muons %d reached, skipping the rest\n", MaxNmu);
-         return 0;
+         return false;
       }
       MuHitsValid[NMu] = 0;
       MuHitsPixel[NMu] = 0;
       const reco::HitPattern &p = it->hitPattern();
-      for (int i = 0; i < p.numberOfHits(); i++) 
+      for(int i = 0; i < p.numberOfHits(); i++) 
       {
          uint32_t hit = p.getHitPattern(i);
-         if (p.validHitFilter(hit)  & &p.pixelHitFilter(hit))
+         if(p.validHitFilter(hit) && p.pixelHitFilter(hit))
             MuHitsPixel[NMu]++;
-         if (p.validHitFilter(hit))
+         if(p.validHitFilter(hit))
             MuHitsValid[NMu]++;
       }
       // fill three momentum (pT, eta, phi)
@@ -248,7 +239,7 @@ bool Analyzer::SelectMuon(const edm::Handle<reco::TrackCollection> &muons,
       MuPhi[NMu] = it->phi();
       MuC[NMu] = it->charge();
       // fill chi2/ndof
-      if (it->ndof()) MuTrackChi2NDOF[NMu] = it->chi2() / it->ndof();
+      if(it->ndof()) MuTrackChi2NDOF[NMu] = it->chi2() / it->ndof();
       // fill distance to primary vertex
       MuDistPV0[NMu] = TMath::Sqrt(TMath::Power(pv->x() - it->vx(), 2.0) + TMath::Power(pv->y() - it->vy(), 2.0));
       MuDistPVz[NMu] = TMath::Abs(pv->z() - it->vz());
@@ -261,11 +252,11 @@ bool Analyzer::SelectMuon(const edm::Handle<reco::TrackCollection> &muons,
          SignLeptonM = 1;
    }
    cout<<"Muons before selection: "<<NMu0<<endl;
-   return 0;
+   return true;
 }
 
 // select primary vertex
-bool Analyzer::SelectPrimaryVertex(const edm::Handle<reco::VertexCollection> &Vertex)
+bool Analyzer::FillPrimaryVertex(const edm::Handle<reco::VertexCollection> &Vertex)
 {
    // if no primary vertices in the event, return false status
    if(Vertex->size() == 0)
@@ -332,14 +323,16 @@ void Analyzer::analyze(const edm::Event &iEvent, const edm::EventSetup &iSetup)
       // primary vertex
       iEvent.getByLabel(InputTagPrimaryVertex, hVertex);
       reco::VertexCollection::const_iterator Vertex = hVertex->begin();
+      FillPrimaryVertex(hVertex);
+   
+      // tracks
+
       // muons
       iEvent.getByLabel(InputTagMuons, hMuon);
-      SelectMuon(hMuon, Vertex);
-      // fill primary vertex
-      SelectPrimaryVertex(hVertex);
+      FillMuon(hMuon, Vertex);
    }
    // fill event info
-   SelectEvent(iEvent);
+   FillEvent(iEvent);
    // all done: store event
    Tree->Fill();
    NEventsSelected++;
