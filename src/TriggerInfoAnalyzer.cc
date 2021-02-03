@@ -201,24 +201,32 @@ void TriggerInfoAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetu
    const vector<string> triggerNamesInDS = hltConfig_.datasetContent(datasetName_);
    cout << "trigger Names size: "<<triggerNamesInDS.size()<<endl;
 
-   const vector<string> triggerNames = hltConfig_.datasetContents();
-   for (unsigned i = 0; i < triggerNames.size(); i++) {
-      accept=0;
-      trigName = triggerNames[i];
-      trigflag[i]=0;
-      if (HltEvtCnt==0)
-         HltTree->Branch(trigName,&trigflag[i],trigName+"/I");
-      else
+   int index = 0;
+
+   const vector<vector<string>> triggerNames = hltConfig_.datasetContents();
+   for(int iD = 0; iD < (int)triggerNames.size(); iD++)
+   {
+      for(unsigned i = 0; i < triggerNames[iD].size(); i++)
       {
-         if (!HltTree->GetBranch(trigName))
+         accept=0;
+         trigName = triggerNames[iD][i];
+         trigflag[index] = 0;
+         if(HltEvtCnt == 0)
+            HltTree->Branch(trigName,&trigflag[index],trigName+"/I");
+         else
          {
-            cout << "WTF" << endl;
-            HltTree->Branch(trigName,&trigflag[i],trigName+"/I");	
+            if (!HltTree->GetBranch(trigName))
+            {
+               cout << "WTF" << endl;
+               HltTree->Branch(trigName,&trigflag[index],trigName+"/I");	
+            }
          }
+         accept = analyzeTrigger(iEvent,iSetup,triggerNames[iD][i]);
+         if(accept)
+            trigflag[index] = 1;
+
+         index = index + 1;
       }
-      accept = analyzeTrigger(iEvent,iSetup,triggerNames[i]);
-      if(accept)
-         trigflag[i] = 1;
    }
    HltEvtCnt++;
    if(saveEvent)
