@@ -123,11 +123,11 @@ private:
    float MuDistPVz[MaxNmu];
    float MuTrackChi2NDOF[MaxNmu];
    // tracks
-   static const int MaxNTracks = 10000;
-   int Ntracks;
-   float TrackPt[MaxNTracks];
-   float TrackEta[MaxNTracks];
-   float TrackPhi[MaxNTracks];
+   static const int MaxNTrack = 10000;
+   int Ntrack;
+   float TrackPt[MaxNTrack];
+   float TrackEta[MaxNTrack];
+   float TrackPhi[MaxNTrack];
    // primary vertex
    int NPV;
    int PVNDOF;
@@ -156,11 +156,11 @@ Analyzer::Analyzer(const edm::ParameterSet& iConfig)
    //InputTagPrimaryVertex = edm::InputTag("hiSelectedVertex"); //'hiSelectedVertex' is generally used for PbPb collisions
 
    // read configuration parameters
-   _flagMC = 0;//iConfig.getParameter<int>("mc"); // true for MC, false for data
-   _flagRECO = 1;//iConfig.getParameter<int>("reco"); // if true, RECO level processed
-   _flagGEN = 0;//iConfig.getParameter<int>("gen"); // if true, generator level processed (works only for MC)
-   _nevents = 0; // number of processed events
-   _neventsSelected = 0; // number of selected events
+   FlagMC = 0;   // iConfig.getParameter<int>("mc"); // true for MC, false for data
+   FlagRECO = 1; // iConfig.getParameter<int>("reco"); // if true, RECO level processed
+   FlagGEN = 0;  // iConfig.getParameter<int>("gen"); // if true, generator level processed (works only for MC)
+   NEvents = 0;  // number of processed events
+   NEventsSelected = 0; // number of selected events
    edm::Service<TFileService> fs;
    Tree = fs->make<TTree>("Muons", "Muons"); //make output tree
 
@@ -169,10 +169,10 @@ Analyzer::Analyzer(const edm::ParameterSet& iConfig)
    // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
    //
    // event
-   Tree->Branch("evRunNumber", &_evRunNumber, "evRunNumber/I"); // run number
-   Tree->Branch("evEventNumber", &_evEventNumber, "evEventNumber/I"); // event number
+   Tree->Branch("RunNumber", &RunNumber, "RunNumber/I"); // run number
+   Tree->Branch("EventNumber", &EventNumber, "EventNumber/I"); // event number
 
-   if(_flagRECO)
+   if(FlagRECO)
    {
       // muons
       Tree->Branch("NMu", &NMu, "NMu/I"); // number of Muons 
@@ -180,20 +180,20 @@ Analyzer::Analyzer(const edm::ParameterSet& iConfig)
       Tree->Branch("MuEta", MuEta, "MuEta[NMu]/F"); // Muon pseudorapidity
       Tree->Branch("MuPhi", MuPhi, "MuPhi[NMu]/F"); // Muon phi
       Tree->Branch("MuC", MuC, "MuC[NMu]/F"); // Muon phi
-      Tree->Branch("MuIso03", MuIso03, "MuIso03[NMu]/F"); // Muon isolation, delta_R=0.3
-      Tree->Branch("MuIso04", MuIso04, "MuIso04[NMu]/F"); // Muon isolation, delta_R=0.4
+      Tree->Branch("MuIso03", MuIso03, "MuIso03[NMu]/F"); // Muon isolation, delta_R = 0.3
+      Tree->Branch("MuIso04", MuIso04, "MuIso04[NMu]/F"); // Muon isolation, delta_R = 0.4
       Tree->Branch("MuHitsValid", MuHitsValid, "MuHitsValid[NMu]/I"); // Muon valid hits number
       Tree->Branch("MuHitsPixel", MuHitsPixel, "MuHitsPixel[NMu]/I"); // Muon pixel hits number
       Tree->Branch("MuDistPV0", MuDistPV0, "MuDistPV0[NMu]/F"); // Muon distance to the primary vertex (projection on transverse plane)
       Tree->Branch("MuDistPVz", MuDistPVz, "MuDistPVz[NMu]/F"); // Muon distance to the primary vertex (z projection)
       Tree->Branch("MuTrackChi2NDOF", MuTrackChi2NDOF, "MuTrackChi2NDOF[NMu]/F"); // Muon track number of degrees of freedom
       // tracks
-      Tree->Branch("NTrack", &_Ntracks, "NTrack/I");   // number of tracks
+      Tree->Branch("NTrack", &NTrack, "NTrack/I");   // number of tracks
       // primary vertex
-      Tree->Branch("Npv", &_Npv, "Npv/I"); // total number of primary vertices
-      Tree->Branch("pvNDOF", &_pvNDOF, "pvNDOF/I"); // number of degrees of freedom of the primary vertex
-      Tree->Branch("pvZ", &_pvZ, "pvZ/F"); // z component of the primary vertex
-      Tree->Branch("pvRho", &_pvRho, "pvRho/F"); // rho of the primary vertex (projection on transverse plane)
+      Tree->Branch("NPV", &NPV, "NPV/I"); // total number of primary vertices
+      Tree->Branch("PVNDOF", &PVNDOF, "PVNDOF/I"); // number of degrees of freedom of the primary vertex
+      Tree->Branch("PVZ", &PVZ, "PVZ/F"); // z component of the primary vertex
+      Tree->Branch("PVRho", &PVRho, "PVRho/F"); // rho of the primary vertex (projection on transverse plane)
    }
 
 }
@@ -212,31 +212,32 @@ Analyzer::~Analyzer()
 // initialise event variables with needed default (zero) values; called in the beginning of each event
 void Analyzer::InitBranchVars()
 {
-   _evRunNumber = 0;
-   _evEventNumber = 0;
+   RunNumber = 0;
+   EventNumber = 0;
    NMu = 0;
-   _Npv= 0;
-   _pvNDOF = 0;
-   _pvZ = 0;
-   _pvRho = 0;
+   NPV = 0;
+   PVNDOF = 0;
+   PVZ = 0;
+   PVRho = 0;
 }
 
 // Store event info (fill corresponding tree variables)
 bool Analyzer::SelectEvent(const edm::Event& iEvent)
 {
-   _evRunNumber = iEvent.id().run();
-   _evEventNumber = iEvent.id().event();
+   RunNumber = iEvent.id().run();
+   EventNumber = iEvent.id().event();
    return 0;
 }
 
 // muon selection
-bool Analyzer::SelectMuon(const edm::Handle<reco::TrackCollection>& muons, const reco::VertexCollection::const_iterator& pv)
+bool Analyzer::SelectMuon(const edm::Handle<reco::TrackCollection>& muons,
+   const reco::VertexCollection::const_iterator& pv)
 {
    using namespace std;
    NMu = 0;
    NMu0 = 0;
    // loop over muons
-   for (reco::TrackCollection::const_iterator it = muons->begin(); it != muons->end(); it++)
+   for (reco::TrackCollection::const_iterator it = muons->begin(); it ! = muons->end(); it++)
    {
       NMu0++;
       if(NMu == MaxNmu)
@@ -259,7 +260,7 @@ bool Analyzer::SelectMuon(const edm::Handle<reco::TrackCollection>& muons, const
       MuPt[NMu] = it->pt();// * it->charge();
       MuEta[NMu] = it->eta();
       MuPhi[NMu] = it->phi();
-      MuC[NMu]=it->charge();
+      MuC[NMu] = it->charge();
       // fill chi2/ndof
       if (it->ndof()) MuTrackChi2NDOF[NMu] = it->chi2() / it->ndof();
       // fill distance to primary vertex
@@ -269,9 +270,9 @@ bool Analyzer::SelectMuon(const edm::Handle<reco::TrackCollection>& muons, const
       NMu++;
       // determine muon sign (in the end the event will be stored only there are opposite signed leptons)
       if(it->charge() == +1)
-         _signLeptonP = 1;
+         SignLeptonP = 1;
       if(it->charge() == -1)
-         _signLeptonM = 1;
+         SignLeptonM = 1;
    }
    cout<<"Muons before selection: "<<NMu0<<endl;
    return 0;
@@ -322,16 +323,11 @@ void Analyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    using namespace reco;
    using namespace std;
 
-   // event counting, printout after each 1K processed events
-   _nevents++;
-   //printf("*** EVENT %6d ***\n", _nevents);
-   if( (_nevents % 1000) == 0)
+   NEvents++;
+   if(NEvents % 1000 == 0)
    {
-      //printf("*****************************************************************\n");
-      printf("************* NEVENTS = %d K, selected = %d *************\n", _nevents / 1000, _neventsSelected);
-      //printf("*****************************************************************\n");
+      printf("************* NEVENTS = %d K, selected = %d *************\n", NEevents / 1000, NEventsSelected);
    }
-   //return;
 
    // declare event contents
    Handle<reco::VertexCollection> hVertex;
@@ -345,14 +341,14 @@ void Analyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    InitBranchVars();
    // process generator level, if needed
    // process reco level, if needed
-   if(_flagRECO)
+   if(FlagRECO)
    {
       // primary vertex
       iEvent.getByLabel(InputTagPrimaryVertex, hVertex);
       reco::VertexCollection::const_iterator Vertex = hVertex->begin();
       // muons
       iEvent.getByLabel(InputTagMuons, hMuon);
-      SelectMuon(hMuons, Vertex);
+      SelectMuon(hMuon, Vertex);
       // fill primary vertex
       SelectPrimaryVertex(Vertex);
    }
