@@ -37,8 +37,8 @@
 #include "DataFormats/EgammaReco/interface/PreshowerClusterFwd.h"
 
 // PF
-#include "DataFormats/ParticleFlowCandidate/PFCanidate.h"
-#include "DataFormats/ParticleFlowCandidate/PFCanidateFwd.h"
+#include "DataFormats/ParticleFlowCandidate/interface/PFCanidate.h"
+#include "DataFormats/ParticleFlowCandidate/interface/PFCanidateFwd.h"
 
 // beamspot
 #include "DataFormats/BeamSpot/interface/BeamSpot.h"
@@ -90,6 +90,8 @@ private:
    InputTag InputTagElectrons;
    InputTag InputTagBtags;
    InputTag InputTagPrimaryVertex;
+   InputTag InputTagPhotons;
+   InputTag InputTagPF;
 
    int FlagMC;
    int FlagRECO;
@@ -404,7 +406,7 @@ void Analyzer::analyze(const Event &iEvent, const EventSetup &iSetup)
    Handle<TrackCollection> hMuon;
    Handle<TrackCollection> hTrack;
    Handle<PhotonCollection> hPhoton;
-   Handle<PFCandidateCollection> hPhoton;
+   Handle<PFCandidateCollection> hPF;
 
    // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
    // >>>>>>>>> event selection >>>>>>>>>
