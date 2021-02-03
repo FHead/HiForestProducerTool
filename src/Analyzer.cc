@@ -343,12 +343,12 @@ bool Analyzer::FillParticleFlow(const Handle<PFCandidateCollection> &PF)
 
    for(int i = 0; i < NPF; i++)
    {
-      PFCandidate &P = PF->at(i);
+      const PFCandidate &P = PF->at(i);
 
       PFPt[i] = P.pt();
       PFEta[i] = P.eta();
       PFPhi[i] = P.phi();
-      PFID[i] = P.id();
+      PFID[i] = P.particleId();
    }
 
    return true;
