@@ -124,7 +124,7 @@ private:
    float MuTrackChi2NDOF[MaxNmu];
    // tracks
    static const int MaxNTrack = 10000;
-   int Ntrack;
+   int NTrack;
    float TrackPt[MaxNTrack];
    float TrackEta[MaxNTrack];
    float TrackPhi[MaxNTrack];
@@ -138,8 +138,8 @@ private:
 //
 // constants (particle masses)
 //
-double _massMu = 0.105658;
-double _massEl = 0.000511;
+double MassMu = 0.105658;
+double MassEl = 0.000511;
 
 //
 // constructor
@@ -326,7 +326,7 @@ void Analyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    NEvents++;
    if(NEvents % 1000 == 0)
    {
-      printf("************* NEVENTS = %d K, selected = %d *************\n", NEevents / 1000, NEventsSelected);
+      printf("************* NEVENTS = %d K, selected = %d *************\n", NEvents / 1000, NEventsSelected);
    }
 
    // declare event contents
@@ -350,7 +350,7 @@ void Analyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       iEvent.getByLabel(InputTagMuons, hMuon);
       SelectMuon(hMuon, Vertex);
       // fill primary vertex
-      SelectPrimaryVertex(Vertex);
+      SelectPrimaryVertex(hVertex);
    }
    // fill event info
    SelectEvent(iEvent);
