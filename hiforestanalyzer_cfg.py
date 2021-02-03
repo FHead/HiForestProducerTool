@@ -18,7 +18,7 @@ process.HiForest.HiForestVersion = cms.string(version)
 goodJSON = 'Cert_181530-183126_HI7TeV_PromptReco_Collisions11_JSON_MuonPhys.txt'
 myLumis = LumiList.LumiList(filename = goodJSON).getCMSSWString().split(',')
 import FWCore.Utilities.FileUtils as FileUtils
-files2011data = FileUtils.loadListFromFile ('CMS_HIRun2011_HIDiMuon_RECO_04Mar2013-v1_root_file_index.txt')
+files2011data = FileUtils.loadListFromFile ('CMS_HIRun2011_HIHighPt_RECO_15Apr2013-v1_root_file_index.txt')
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(*files2011data
     )
@@ -39,10 +39,10 @@ process.TFileService = cms.Service("TFileService",
                                    fileName=cms.string("HiForestAOD_DATAtest2011.root"))
 
 #Init Trigger Analyzer
-process.hltanalysis = cms.EDAnalyzer('TriggerInfoAnalyzer',
+process.Trigger = cms.EDAnalyzer('TriggerInfoAnalyzer',
                               processName = cms.string("HLT"),
                               triggerName = cms.string("@"),
-                              datasetName = cms.string("HIDiMuon"),  #'HICorePhysics' to look at Core Physics only
+                              datasetName = cms.string("HIHighPt"),  #'HICorePhysics' to look at Core Physics only
                               triggerResults = cms.InputTag("TriggerResults","","HLT"),
                               triggerEvent   = cms.InputTag("hltTriggerSummaryAOD","","HLT")
                               )
@@ -51,7 +51,7 @@ process.hltanalysis = cms.EDAnalyzer('TriggerInfoAnalyzer',
 process.Analyzer = cms.EDAnalyzer('Analyzer')
 process.dump=cms.EDAnalyzer('EventContentAnalyzer') #easy check of Event structure and names without using the TBrowser
 
-process.ana_step = cms.Path(process.hltanalysis +
+process.ana_step = cms.Path(process.Trigger +
 		  	    #process.dump+  #uncomment if necessary to check the name. Do not forget to change the number of events to '1'
 			    process.Analyzer +
                             process.HiForest
