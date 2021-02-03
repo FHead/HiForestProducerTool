@@ -61,6 +61,7 @@ private:
 
    // user routines (detailed description given with the method implementations)
    bool FillEvent(const edm::Event &iEvent);
+   bool FillTrack(const edm::Handle<reco::TrackCollection> &Tracks, const reco::VertexCollection::const_iterator &PV);
    bool FillMuon(const edm::Handle<reco::TrackCollection> &muons, const reco::VertexCollection::const_iterator &pv);
    bool FillPrimaryVertex(const edm::Handle<reco::VertexCollection> &Vertex);
    const reco::Candidate* GetFinalState(const reco::Candidate* particle, const int id);
@@ -100,6 +101,11 @@ private:
    float TrackPt[MaxNTrack];
    float TrackEta[MaxNTrack];
    float TrackPhi[MaxNTrack];
+   int TrackHitsValid[MaxNTrack];
+   int TrackHitsPixel[MaxNTrack];
+   float TrackDistPV0[MaxNTrack];
+   float TrackDistPVz[MaxNTrack];
+   float TrackChi2NDOF[MaxNTrack];
    // muons
    static const int MaxNmu = 10;
    int NMu;
@@ -140,8 +146,8 @@ Analyzer::Analyzer(const edm::ParameterSet &iConfig)
    FlagGEN = 0;  // iConfig.getParameter<int>("gen"); // if true, generator level processed (works only for MC)
    NEvents = 0;  // number of processed events
    NEventsSelected = 0; // number of selected events
-   edm::Service<TFileService> fs;
-   Tree = fs->make<TTree>("Muons", "Muons"); //make output tree
+   edm::Service<TFileService> FileService;
+   Tree = FileService->make<TTree>("EventObjects", "EventObjects"); //make output tree
 
    // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
    // >>>>>>> tree branches >>>>>>>>>>>>
@@ -158,6 +164,11 @@ Analyzer::Analyzer(const edm::ParameterSet &iConfig)
       Tree->Branch("TrackPt", TrackPt, "TrackPt[NTrack]/F");
       Tree->Branch("TrackEta", TrackEta, "TrackEta[NTrack]/F");
       Tree->Branch("TrackPhi", TrackPhi, "TrackPhi[NTrack]/F");
+      Tree->Branch("TrackHitsValid", TrackHitsValid, "TrackHitsValid[NTrack]/I");
+      Tree->Branch("TrackHitsPixel", TrackHitsPixel, "TrackHitsPixel[NTrack]/I");
+      Tree->Branch("TrackDistPV0", TrackDistPV0, "TrackDistPV0[NTrack]/F");
+      Tree->Branch("TrackDistPVz", TrackDistPVz, "TrackDistPVz[NTrack]/F");
+      Tree->Branch("TrackChi2NDOF", TrackChi2NDOF, "TrackChi2NDOF[NTrack]/F");
       // muons
       Tree->Branch("NMu",  &NMu, "NMu/I"); // number of Muons 
       Tree->Branch("MuPt", MuPt, "MuPt[NMu]/F"); // Muon pT
@@ -203,6 +214,44 @@ bool Analyzer::FillEvent(const edm::Event &iEvent)
 {
    RunNumber = iEvent.id().run();
    EventNumber = iEvent.id().event();
+   return true;
+}
+
+bool Analyzer::FillTrack(const edm::Handle<reco::TrackCollection> &Tracks,
+   const reco::VertexCollection::const_iterator &PV)
+{
+   NTrack = 0;
+   for(reco::TrackCollection::const_iterator iter = Tracks->begin(); iter != Tracks->end(); iter++)
+   {
+      TrackHitsPixel[NTrack] = 0;
+      TrackHitsValid[NTrack] = 0;
+
+      const reco::HitPattern &p = iter->hitPattern();
+      for(int i = 0; i < p.numberOfHits(); i++) 
+      {
+         uint32_t hit = p.getHitPattern(i);
+         if(p.validHitFilter(hit) && p.pixelHitFilter(hit))
+            TrackHitsPixel[NTrack]++;
+         if(p.validHitFilter(hit))
+            TrackHitsValid[NTrack]++;
+      }
+      
+      TrackPt[NTrack] = iter->pt();
+      TrackEta[NTrack] = iter->eta();
+      TrackPhi[NTrack] = iter->phi();
+      TrackCharge[NTrack] = iter->charge();
+      
+      if(it->ndof())
+         TrackChi2NDOF[NTrack] = iter->chi2() / iter->ndof();
+      
+      double DX = PV->x() - iter->vx();
+      double DY = PV->y() - iter->vy();
+      TrackDistPV0[NTrack] = sqrt(DX * DX + DY * DY);
+      TrackDistPVz[NTrack] = fabs(PV->z() - it->vz());
+      
+      NTrack = NTrack + 1;
+   }
+
    return true;
 }
 
@@ -326,6 +375,8 @@ void Analyzer::analyze(const edm::Event &iEvent, const edm::EventSetup &iSetup)
       FillPrimaryVertex(hVertex);
    
       // tracks
+      iEvent.getByLabel(InputTagTracks, hTrack);
+      FillTrack(hTrack, Vertex);
 
       // muons
       iEvent.getByLabel(InputTagMuons, hMuon);
