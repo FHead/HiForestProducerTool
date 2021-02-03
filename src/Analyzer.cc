@@ -101,6 +101,7 @@ private:
    float TrackPt[MaxNTrack];
    float TrackEta[MaxNTrack];
    float TrackPhi[MaxNTrack];
+   int TrackCharge[MaxNTrack];
    int TrackHitsValid[MaxNTrack];
    int TrackHitsPixel[MaxNTrack];
    float TrackDistPV0[MaxNTrack];
@@ -164,6 +165,7 @@ Analyzer::Analyzer(const edm::ParameterSet &iConfig)
       Tree->Branch("TrackPt", TrackPt, "TrackPt[NTrack]/F");
       Tree->Branch("TrackEta", TrackEta, "TrackEta[NTrack]/F");
       Tree->Branch("TrackPhi", TrackPhi, "TrackPhi[NTrack]/F");
+      Tree->Branch("TrackCharge", TrackCharge, "TrackCharge[NTrack]/I");
       Tree->Branch("TrackHitsValid", TrackHitsValid, "TrackHitsValid[NTrack]/I");
       Tree->Branch("TrackHitsPixel", TrackHitsPixel, "TrackHitsPixel[NTrack]/I");
       Tree->Branch("TrackDistPV0", TrackDistPV0, "TrackDistPV0[NTrack]/F");
@@ -241,13 +243,13 @@ bool Analyzer::FillTrack(const edm::Handle<reco::TrackCollection> &Tracks,
       TrackPhi[NTrack] = iter->phi();
       TrackCharge[NTrack] = iter->charge();
       
-      if(it->ndof())
+      if(iter->ndof())
          TrackChi2NDOF[NTrack] = iter->chi2() / iter->ndof();
       
       double DX = PV->x() - iter->vx();
       double DY = PV->y() - iter->vy();
       TrackDistPV0[NTrack] = sqrt(DX * DX + DY * DY);
-      TrackDistPVz[NTrack] = fabs(PV->z() - it->vz());
+      TrackDistPVz[NTrack] = fabs(PV->z() - iter->vz());
       
       NTrack = NTrack + 1;
    }
