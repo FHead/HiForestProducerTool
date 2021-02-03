@@ -106,6 +106,7 @@ private:
 
    int RunNumber;
    int EventNumber;
+   
    static const int MaxNTrack = 10000;
    int NTrack;
    float TrackPt[MaxNTrack];
@@ -117,6 +118,7 @@ private:
    float TrackDistPV0[MaxNTrack];
    float TrackDistPVz[MaxNTrack];
    float TrackChi2NDOF[MaxNTrack];
+   
    static const int MaxNmu = 10;
    int NMu;
    int NMu0;
@@ -131,11 +133,30 @@ private:
    float MuDistPV0[MaxNmu];
    float MuDistPVz[MaxNmu];
    float MuTrackChi2NDOF[MaxNmu];
+   
    static const int MaxNPhoton = 1000;
    int NPhoton;
    float PhotonPt[MaxNPhoton];
    float PhotonEta[MaxNPhoton];
    float PhotonPhi[MaxNPhoton];
+   float PhotonEcalR03[MaxNPhoton];
+   float PhotonHcalR03[MaxNPhoton];
+   float PhotonTrackR03[MaxNPhoton];
+   float PhotonNTrackR03[MaxNPhoton];
+   float PhotonPFChargedIsolation[MaxNPhoton];
+   float PhotonPFNeutralIsolation[MaxNPhoton];
+   float PhotonPFPhotonIsolation[MaxNPhoton];
+   float PhotonE15[MaxNPhoton];
+   float PhotonE25[MaxNPhoton];
+   float PhotonE33[MaxNPhoton];
+   float PhotonE55[MaxNPhoton];
+   float PhotonSigmaEtaEta[MaxNPhoton];
+   float PhotonSigmaIEtaIEta[MaxNPhoton];
+   float PhotonR9[MaxNPhoton];
+   float PhotonR15[MaxNPhoton];
+   float PhotonR25[MaxNPhoton];
+   float PhotonHOverE[MaxNPhoton];
+   
    static const int MaxNPF = 10000;
    int NPF;
    float PFPt[MaxNPF];
@@ -204,6 +225,23 @@ Analyzer::Analyzer(const ParameterSet &iConfig)
       Tree->Branch("PhotonPt", PhotonPt, "PhotonPt[NPhoton]/F");
       Tree->Branch("PhotonEta", PhotonEta, "PhotonEta[NPhoton]/F");
       Tree->Branch("PhotonPhi", PhotonPhi, "PhotonPhi[NPhoton]/F");
+      Tree->Branch("PhotonEcalR03", PhotonEcalR03, "PhotonEcalR03[MaxNPhoton]");
+      Tree->Branch("PhotonHcalR03", PhotonHcalR03, "PhotonHcalR03[MaxNPhoton]");
+      Tree->Branch("PhotonTrackR03", PhotonTrackR03, "PhotonTrackR03[MaxNPhoton]");
+      Tree->Branch("PhotonNTrackR03", PhotonNTrackR03, "PhotonNTrackR03[MaxNPhoton]");
+      Tree->Branch("PhotonPFChargedIsolation", PhotonPFChargedIsolation, "PhotonPFChargedIsolation[MaxNPhoton]");
+      Tree->Branch("PhotonPFNeutralIsolation", PhotonPFNeutralIsolation, "PhotonPFNeutralIsolation[MaxNPhoton]");
+      Tree->Branch("PhotonPFPhotonIsolation", PhotonPFPhotonIsolation, "PhotonPFPhotonIsolation[MaxNPhoton]");
+      Tree->Branch("PhotonE15", PhotonE15, "PhotonE15[MaxNPhoton]");
+      Tree->Branch("PhotonE25", PhotonE25, "PhotonE25[MaxNPhoton]");
+      Tree->Branch("PhotonE33", PhotonE33, "PhotonE33[MaxNPhoton]");
+      Tree->Branch("PhotonE55", PhotonE55, "PhotonE55[MaxNPhoton]");
+      Tree->Branch("PhotonSigmaEtaEta", PhotonSigmaEtaEta, "PhotonSigmaEtaEta[MaxNPhoton]");
+      Tree->Branch("PhotonSigmaIEtaIEta", PhotonSigmaIEtaIEta, "PhotonSigmaIEtaIEta[MaxNPhoton]");
+      Tree->Branch("PhotonR9", PhotonR9, "PhotonR9[MaxNPhoton]");
+      Tree->Branch("PhotonR15", PhotonR15, "PhotonR15[MaxNPhoton]");
+      Tree->Branch("PhotonR25", PhotonR25, "PhotonR25[MaxNPhoton]");
+      Tree->Branch("PhotonHOverE", PhotonHOverE, "PhotonHOverE[MaxNPhoton]");
 
       Tree->Branch("NPF", &NPF, "NPF/I");
       Tree->Branch("PFPt", PFPt, "PFPt[NPF]/F");
@@ -343,6 +381,25 @@ bool Analyzer::FillPhoton(const Handle<PhotonCollection> &Photons)
       PhotonPt[i] = P.pt();
       PhotonEta[i] = P.eta();
       PhotonPhi[i] = P.phi();
+      
+      PhotonEcalR03[i] = P.ecalRecHitSumEtConeDR03();
+      PhotonHcalR03[i] = P.hcalTowerSumEtConeDR03();
+      PhotonTrackR03[i] = P.trkSumPtSolidConeDR03();
+      PhotonNTrackR03[i] = P.nTrkSolidConeDR03();
+      PhotonPFChargedIsolation[i] = P.chargedHadronIso();
+      PhotonPFNeutralIsolation[i] = P.neutralHadronIso();
+      PhotonPFPhotonIsolation[i] = P.photonIso();
+
+      PhotonE15[i] = P.e1x5();
+      PhotonE25[i] = P.e2x5();
+      PhotonE33[i] = P.e3x3();
+      PhotonE55[i] = P.e5x5();
+      PhotonSigmaEtaEta[i] = P.sigmaEtaEta();
+      PhotonSigmaIEtaIEta[i] = P.sigmaIetaIeta();
+      PhotonR9[i] = P.r9();
+      PhotonR15[i] = P.r1x5();
+      PhotonR25[i] = P.r2x5();
+      PhotonHOverE[i] = P.hadronicOverEm();
    }
 
    return true;
