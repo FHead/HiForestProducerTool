@@ -203,7 +203,7 @@ void TriggerInfoAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetu
 
    int index = 0;
 
-   const vector<vector<string>> triggerNames = hltConfig_.datasetContents();
+   const vector<vector<string> > triggerNames = hltConfig_.datasetContents();
    for(int iD = 0; iD < (int)triggerNames.size(); iD++)
    {
       for(unsigned i = 0; i < triggerNames[iD].size(); i++)
