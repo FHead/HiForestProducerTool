@@ -334,6 +334,17 @@ bool Analyzer::FillMuon(const Handle<TrackCollection> &muons,
 
 bool Analyzer::FillPhoton(const Handle<PhotonCollection> &Photons)
 {
+   NPhoton = Photons->size();
+
+   for(int i = 0; i < NPhoton; i++)
+   {
+      const Photon &P = Photons->at(i);
+
+      PhotonPt[i] = P.pt();
+      PhotonEta[i] = P.eta();
+      PhotonPhi[i] = P.phi();
+   }
+
    return true;
 }
    
