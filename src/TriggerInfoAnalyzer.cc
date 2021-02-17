@@ -217,7 +217,7 @@ void TriggerInfoAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetu
          {
             if (!HltTree->GetBranch(trigName))
             {
-               cout << "WTF" << endl;
+               cout << "WTF" << " " << trigName << endl;
                HltTree->Branch(trigName,&trigflag[index],trigName+"/I");	
             }
          }
