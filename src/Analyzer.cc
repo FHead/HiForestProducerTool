@@ -307,7 +307,24 @@ void Analyzer::InitBranchVars()
 {
    RunNumber = 0;
    EventNumber = 0;
-   Centrality = -1;
+   NPixel = 0;
+   NPixelTrack = 0;
+   NFullTrack = 0;
+   NFullTrackPTCut = 0;
+   NFullTrackEtaCut = 0;
+   NFullTrackEtaPTCut = 0;
+   HFPlus = 0;
+   HFMinus = 0;
+   HFPlusEta4 = 0;
+   HFMinusEta4 = 0;
+   HFHitPlus = 0;
+   HFHitMinus = 0;
+   ZDCPlus = 0;
+   ZDCMinus = 0;
+   EEPlus = 0;
+   EEMinus = 0;
+   EB = 0;
+   ET = 0;
    NTrack = 0;
    NMu = 0;
    NPhoton = 0;
@@ -329,10 +346,10 @@ bool Analyzer::FillEvent(const Event &iEvent)
 
    NPixel = hCentrality->multiplicityPixel();
    NPixelTrack = hCentrality->NpixelTracks();
-   NTrack = hCentrality->Ntracks();
-   NTrackPTCut = hCentrality->NtracksPtCut();
-   NTrackEtaCut = hCentrality->NtracksEtaCut();
-   NTrackEtaPTCut = hCentrality->NtracksEtaPtCut();
+   NFullTrack = hCentrality->Ntracks();
+   NFullTrackPTCut = hCentrality->NtracksPtCut();
+   NFullTrackEtaCut = hCentrality->NtracksEtaCut();
+   NFullTrackEtaPTCut = hCentrality->NtracksEtaPtCut();
    HFPlus = hCentrality->EtHFtowerSumPlus();
    HFMinus = hCentrality->EtHFtowerSumMinus();
    HFPlusEta4 = hCentrality->EtHFtruncatedPlus();
