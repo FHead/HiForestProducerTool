@@ -15,6 +15,7 @@
 
 // Centrality
 #include "DataFormats/HeavyIonEvent/interface/Centrality.h"
+#include "DataFormats/HeavyIonEvent/interface/CentralityProvider.h"
 
 // Track
 #include "DataFormats/TrackReco/interface/Track.h"
@@ -110,6 +111,8 @@ private:
 
    int RunNumber;
    int EventNumber;
+   
+   float CentralityBin;
    int NPixel;
    int NPixelTrack;
    int NFullTrack;
@@ -218,6 +221,7 @@ Analyzer::Analyzer(const ParameterSet &iConfig)
    Tree->Branch("RunNumber",   &RunNumber,   "RunNumber/I");
    Tree->Branch("EventNumber", &EventNumber, "EventNumber/I");
    
+   Tree->Branch("Centrality", &Centrality, "Centrality/F");
    Tree->Branch("NPixel", &NPixel, "NPixel/I");
    Tree->Branch("NPixelTrack", &NPixelTrack, "NPixelTrack/I");
    Tree->Branch("NFullTrack", &NFullTrack, "NFullTrack/I");
@@ -307,6 +311,7 @@ void Analyzer::InitBranchVars()
 {
    RunNumber = 0;
    EventNumber = 0;
+   CentralityBin = 0;
    NPixel = 0;
    NPixelTrack = 0;
    NFullTrack = 0;
@@ -343,6 +348,10 @@ bool Analyzer::FillEvent(const Event &iEvent)
 
    Handle<Centrality> hCentrality;
    iEvent.getByLabel(InputTagCentrality, hCentrality);
+
+   CentralityProvider CentralityEvaluator(iSetup);
+   CentralityEvaluator.newEvent(iEvent, iSetup);
+   CentralityBin = CentralityEvaluator.getBin();
 
    NPixel = hCentrality->multiplicityPixel();
    NPixelTrack = hCentrality->NpixelTracks();
