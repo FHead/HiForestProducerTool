@@ -88,7 +88,7 @@ private:
    void FillFourMomentum(const Candidate* particle, float* p);
    void InitBranchVars();
 
-   InputTag InputTagCentrality;
+   InputTag InputTagCentralityBin;
    InputTag InputTagTracks;
    InputTag InputTagMuons;
    InputTag InputTagElectrons;
@@ -180,7 +180,7 @@ Analyzer::Analyzer(const ParameterSet &iConfig)
    setbuf(stdout, NULL);
 
    // input tags
-   InputTagCentrality    = InputTag("centralityBin", "HFtowers");
+   InputTagCentralityBin = InputTag("centralityBin", "HFtowers");
    InputTagMuons         = InputTag("globalMuons");
    InputTagTracks        = InputTag("generalTracks");
    InputTagPrimaryVertex = InputTag("offlinePrimaryVertices");
@@ -290,7 +290,7 @@ bool Analyzer::FillEvent(const Event &iEvent)
    EventNumber = iEvent.id().event();
 
    edm::Handle<int> hCBin;
-   iEvent.getByToken(InputTagCentralityBin, hCBin);
+   iEvent.getByLabel(InputTagCentralityBin, hCBin);
    Centrality = (*hCBin) * 0.5;
 
    return true;
