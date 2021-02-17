@@ -13,6 +13,9 @@
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 #include "DataFormats/Common/interface/Ref.h"
 
+// Centrality
+#include "DataFormats/HeavyIonEvent/interface/Centrality.h"
+
 // Track
 #include "DataFormats/TrackReco/interface/Track.h"
 #include "DataFormats/TrackReco/interface/TrackFwd.h"
@@ -85,6 +88,7 @@ private:
    void FillFourMomentum(const Candidate* particle, float* p);
    void InitBranchVars();
 
+   InputTag InputTagCentrality;
    InputTag InputTagTracks;
    InputTag InputTagMuons;
    InputTag InputTagElectrons;
@@ -106,6 +110,7 @@ private:
 
    int RunNumber;
    int EventNumber;
+   float Centrality;
    
    static const int MaxNTrack = 10000;
    int NTrack;
@@ -175,11 +180,12 @@ Analyzer::Analyzer(const ParameterSet &iConfig)
    setbuf(stdout, NULL);
 
    // input tags
-   InputTagMuons = InputTag("globalMuons");
-   InputTagTracks = InputTag("generalTracks");
+   InputTagCentrality    = InputTag("centralityBin", "HFtowers");
+   InputTagMuons         = InputTag("globalMuons");
+   InputTagTracks        = InputTag("generalTracks");
    InputTagPrimaryVertex = InputTag("offlinePrimaryVertices");
-   InputTagPhotons = InputTag("photons");
-   InputTagPF = InputTag("particleFlow");
+   InputTagPhotons       = InputTag("photons");
+   InputTagPF            = InputTag("particleFlow");
    // vertex input tag used for pp collisions = "offlinePrimaryVertices"
    // PbPb might be "hiSelectedVertex"
 
@@ -192,8 +198,9 @@ Analyzer::Analyzer(const ParameterSet &iConfig)
    Service<TFileService> FileService;
    Tree = FileService->make<TTree>("EventObjects", "EventObjects"); //make output tree
 
-   Tree->Branch("RunNumber",  &RunNumber, "RunNumber/I"); // run number
-   Tree->Branch("EventNumber",  &EventNumber, "EventNumber/I"); // event number
+   Tree->Branch("RunNumber",   &RunNumber,   "RunNumber/I");
+   Tree->Branch("EventNumber", &EventNumber, "EventNumber/I");
+   Tree->Branch("Centrality",  &Centrality,  "Centrality/F");
 
    if(FlagRECO)
    {
@@ -265,6 +272,7 @@ void Analyzer::InitBranchVars()
 {
    RunNumber = 0;
    EventNumber = 0;
+   Centrality = -1;
    NTrack = 0;
    NMu = 0;
    NPhoton = 0;
@@ -280,6 +288,11 @@ bool Analyzer::FillEvent(const Event &iEvent)
 {
    RunNumber = iEvent.id().run();
    EventNumber = iEvent.id().event();
+
+   edm::Handle<int> hCBin;
+   iEvent.getByToken(InputTagCentralityBin, hCBin);
+   Centrality = (*hCBin) * 0.5;
+
    return true;
 }
 
