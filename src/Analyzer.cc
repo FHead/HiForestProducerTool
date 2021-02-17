@@ -349,9 +349,9 @@ bool Analyzer::FillEvent(const Event &iEvent, const EventSetup &iSetup)
    Handle<Centrality> hCentrality;
    iEvent.getByLabel(InputTagCentrality, hCentrality);
 
-   CentralityProvider CentralityEvaluator(iSetup);
-   CentralityEvaluator.newEvent(iEvent, iSetup);
-   CentralityBin = CentralityEvaluator.getBin();
+   // CentralityProvider CentralityEvaluator(iSetup);
+   // CentralityEvaluator.newEvent(iEvent, iSetup);
+   // CentralityBin = CentralityEvaluator.getBin();
 
    NPixel = hCentrality->multiplicityPixel();
    NPixelTrack = hCentrality->NpixelTracks();
