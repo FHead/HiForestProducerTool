@@ -15,6 +15,7 @@
 
 // Centrality
 #include "DataFormats/HeavyIonEvent/interface/Centrality.h"
+#include "RecoHI/HiCentralityAlgos/interface/CentralityProvider.h"
 
 // Track
 #include "DataFormats/TrackReco/interface/Track.h"
@@ -88,7 +89,7 @@ private:
    void FillFourMomentum(const Candidate* particle, float* p);
    void InitBranchVars();
 
-   InputTag InputTagCentralityBin;
+   InputTag InputTagCentrality;
    InputTag InputTagTracks;
    InputTag InputTagMuons;
    InputTag InputTagElectrons;
@@ -180,7 +181,7 @@ Analyzer::Analyzer(const ParameterSet &iConfig)
    setbuf(stdout, NULL);
 
    // input tags
-   InputTagCentralityBin = InputTag("centralityBin", "HFtowers");
+   InputTagCentrality    = InputTag("hiCentrality");
    InputTagMuons         = InputTag("globalMuons");
    InputTagTracks        = InputTag("generalTracks");
    InputTagPrimaryVertex = InputTag("offlinePrimaryVertices");
