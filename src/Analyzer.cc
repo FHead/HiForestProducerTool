@@ -15,7 +15,6 @@
 
 // Centrality
 #include "DataFormats/HeavyIonEvent/interface/Centrality.h"
-#include "RecoHI/HiCentralityAlgos/interface/CentralityProvider.h"
 
 // Track
 #include "DataFormats/TrackReco/interface/Track.h"
@@ -111,7 +110,24 @@ private:
 
    int RunNumber;
    int EventNumber;
-   float Centrality;
+   int NPixel;
+   int NPixelTrack;
+   int NFullTrack;
+   int NFullTrackPTCut;
+   int NFullTrackEtaCut;
+   int NFullTrackEtaPTCut;
+   float HFPlus;
+   float HFMinus;
+   float HFPlusEta4;
+   float HFMinusEta4;
+   int HFHitPlus;
+   int HFHitMinus;
+   float ZDCPlus;
+   float ZDCMinus;
+   float EEPlus;
+   float EEMinus;
+   float EB;
+   float ET;
    
    static const int MaxNTrack = 10000;
    int NTrack;
@@ -201,7 +217,25 @@ Analyzer::Analyzer(const ParameterSet &iConfig)
 
    Tree->Branch("RunNumber",   &RunNumber,   "RunNumber/I");
    Tree->Branch("EventNumber", &EventNumber, "EventNumber/I");
-   Tree->Branch("Centrality",  &Centrality,  "Centrality/F");
+   
+   Tree->Branch("NPixel", &NPixel, "NPixel/I");
+   Tree->Branch("NPixelTrack", &NPixelTrack, "NPixelTrack/I");
+   Tree->Branch("NFullTrack", &NFullTrack, "NFullTrack/I");
+   Tree->Branch("NFullTrackPTCut", &NFullTrackPTCut, "NFullTrackPTCut/I");
+   Tree->Branch("NFullTrackEtaCut", &NFullTrackEtaCut, "NFullTrackEtaCut/I");
+   Tree->Branch("NFullTrackEtaPTCut", &NFullTrackEtaPTCut, "NFullTrackEtaPTCut/I");
+   Tree->Branch("HFPlus", &HFPlus, "HFPlus/F");
+   Tree->Branch("HFMinus", &HFMinus, "HFMinus/F");
+   Tree->Branch("HFPlusEta4", &HFPlusEta4, "HFPlusEta4/F");
+   Tree->Branch("HFMinusEta4", &HFMinusEta4, "HFMinusEta4/F");
+   Tree->Branch("HFHitPlus", &HFHitPlus, "HFHitPlus/I");
+   Tree->Branch("HFHitMinus", &HFHitMinus, "HFHitMinus/I");
+   Tree->Branch("ZDCPlus", &ZDCPlus, "ZDCPlus/F");
+   Tree->Branch("ZDCMinus", &ZDCMinus, "ZDCMinus/F");
+   Tree->Branch("EEPlus", &EEPlus, "EEPlus/F");
+   Tree->Branch("EEMinus", &EEMinus, "EEMinus/F");
+   Tree->Branch("EB", &EB, "EB/F");
+   Tree->Branch("ET", &ET, "ET/F");
 
    if(FlagRECO)
    {
@@ -290,9 +324,27 @@ bool Analyzer::FillEvent(const Event &iEvent)
    RunNumber = iEvent.id().run();
    EventNumber = iEvent.id().event();
 
-   edm::Handle<int> hCBin;
-   iEvent.getByLabel(InputTagCentralityBin, hCBin);
-   Centrality = (*hCBin) * 0.5;
+   Handle<Centrality> hCentrality;
+   iEvent.getByLabel(InputTagCentrality, hCentrality);
+
+   NPixel = hCentrality->multiplicityPixel();
+   NPixelTrack = hCentrality->NpixelTracks();
+   NTrack = hCentrality->Ntracks();
+   NTrackPTCut = hCentrality->NtracksPtCut();
+   NTrackEtaCut = hCentrality->NtracksEtaCut();
+   NTrackEtaPTCut = hCentrality->NtracksEtaPtCut();
+   HFPlus = hCentrality->EtHFtowerSumPlus();
+   HFMinus = hCentrality->EtHFtowerSumMinus();
+   HFPlusEta4 = hCentrality->EtHFtruncatedPlus();
+   HFMinusEta4 = hCentrality->EtHFtruncatedMinus();
+   HFHitPlus = hCentrality->EtHFhitSumPlus();
+   HFHitMinus = hCentrality->EtHFhitSumMinus();
+   ZDCPlus = hCentrality->zdcSumPlus();
+   ZDCMinus = hCentrality->zdcSumMinus();
+   EEPlus = hCentrality->EtEESumPlus();
+   EEMinus = hCentrality->EtEESumMinus();
+   EB = hCentrality->EtEBSum();
+   ET = hCentrality->EtMidRapiditySum();
 
    return true;
 }
