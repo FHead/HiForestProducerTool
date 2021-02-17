@@ -79,7 +79,7 @@ private:
    virtual void beginLuminosityBlock(const LuminosityBlock &, const EventSetup &);
    virtual void endLuminosityBlock(const LuminosityBlock &, const EventSetup &);
 
-   bool FillEvent(const Event &iEvent);
+   bool FillEvent(const Event &iEvent, const EventSetup &iSetup);
    bool FillTrack(const Handle<TrackCollection> &Tracks, const VertexCollection::const_iterator &PV);
    bool FillMuon(const Handle<TrackCollection> &muons, const VertexCollection::const_iterator &pv);
    bool FillPhoton(const Handle<PhotonCollection> &Photons);
@@ -221,7 +221,7 @@ Analyzer::Analyzer(const ParameterSet &iConfig)
    Tree->Branch("RunNumber",   &RunNumber,   "RunNumber/I");
    Tree->Branch("EventNumber", &EventNumber, "EventNumber/I");
    
-   Tree->Branch("Centrality", &Centrality, "Centrality/F");
+   Tree->Branch("CentralityBin", &CentralityBin, "CentralityBin/F");
    Tree->Branch("NPixel", &NPixel, "NPixel/I");
    Tree->Branch("NPixelTrack", &NPixelTrack, "NPixelTrack/I");
    Tree->Branch("NFullTrack", &NFullTrack, "NFullTrack/I");
@@ -341,7 +341,7 @@ void Analyzer::InitBranchVars()
 }
 
 // Store event info (fill corresponding tree variables)
-bool Analyzer::FillEvent(const Event &iEvent)
+bool Analyzer::FillEvent(const Event &iEvent, const EventSetup &iSetup)
 {
    RunNumber = iEvent.id().run();
    EventNumber = iEvent.id().event();
@@ -600,7 +600,7 @@ void Analyzer::analyze(const Event &iEvent, const EventSetup &iSetup)
       FillParticleFlow(hPF);
    }
    // fill event info
-   FillEvent(iEvent);
+   FillEvent(iEvent, iSetup);
    // all done: store event
    Tree->Fill();
    NEventsSelected++;
