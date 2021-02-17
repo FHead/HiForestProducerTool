@@ -47,6 +47,13 @@ process.Trigger = cms.EDAnalyzer('TriggerInfoAnalyzer',
                               triggerEvent   = cms.InputTag("hltTriggerSummaryAOD","","HLT")
                               )
 
+# centrality settings
+process.HeavyIonGlobalParameters = cms.PSet(
+  centralityVariable = cms.string("HFtowers"),
+  nonDefaultGlauberModel = cms.string(""),
+  centralitySrc = cms.InputTag("hiCentrality")
+  )
+
 #Collect event data
 process.Analyzer = cms.EDAnalyzer('Analyzer')
 process.dump=cms.EDAnalyzer('EventContentAnalyzer') #easy check of Event structure and names without using the TBrowser
