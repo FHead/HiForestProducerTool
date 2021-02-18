@@ -64,5 +64,5 @@ process.ana_step = cms.Path(process.Trigger +
                             process.HiForest
 )
 
-process.MessageLogger.cerr.FwkReport.reportEvery = cms.untrackd.int32(1000)
-process.MessageLogger.cerr.FwkSummary.reportEvery = cms.untrackd.int32(1000)
+process.MessageLogger.cerr.FwkReport.reportEvery = cms.untracked.int32(1000)
+process.MessageLogger.cerr.FwkSummary.reportEvery = cms.untracked.int32(1000)
