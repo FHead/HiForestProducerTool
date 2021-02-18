@@ -143,10 +143,10 @@ void TriggerInfoAnalyzer::beginRun(edm::Run const& iRun, edm::EventSetup const& 
                   << " TriggerName " << triggerName_ 
                   << " not available in (new) config!" << endl;
                cout << "Available TriggerNames are: " << endl;
-               hltConfig_.dump("Triggers");
+               // hltConfig_.dump("Triggers");
             }
          }
-         hltConfig_.dump("Datasets");//use to check the Dataset name to analyze the triggers
+         // hltConfig_.dump("Datasets");//use to check the Dataset name to analyze the triggers
       }
    } else {
       cout << "HLTEventAnalyzerAOD::analyze:"
