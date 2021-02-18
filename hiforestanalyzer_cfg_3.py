@@ -36,7 +36,7 @@ process.HiForest.GlobalTagLabel = process.GlobalTag.globaltag
 
 #Define the output root file (change each run not to overwrite previous output)
 process.TFileService = cms.Service("TFileService",
-                                   fileName=cms.string("HiForestAOD_DATAtest2011.root"))
+                                   fileName=cms.string("HiForestAOD_DATAtest2011_part3.root"))
 
 #Init Trigger Analyzer
 process.Trigger = cms.EDAnalyzer('TriggerInfoAnalyzer',
