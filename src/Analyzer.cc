@@ -458,7 +458,7 @@ bool Analyzer::FillMuon(const Handle<TrackCollection> &muons,
       if(it->charge() == -1)
          SignLeptonM = 1;
    }
-   cout<<"Muons before selection: "<<NMu0<<endl;
+   // cout<<"Muons before selection: "<<NMu0<<endl;
    return true;
 }
 

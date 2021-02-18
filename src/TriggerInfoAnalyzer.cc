@@ -199,7 +199,7 @@ void TriggerInfoAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetu
    Int_t accept;
    TString trigName;
    const vector<string> triggerNamesInDS = hltConfig_.datasetContent(datasetName_);
-   cout << "trigger Names size: "<<triggerNamesInDS.size()<<endl;
+   // cout << "trigger Names size: "<<triggerNamesInDS.size()<<endl;
 
    int index = 0;
 
